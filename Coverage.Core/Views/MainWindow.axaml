@@ -252,6 +252,14 @@
                         <ProgressBar IsVisible="{Binding IsBusy}" IsIndeterminate="True" Height="4" />
                         <TextBlock Text="{Binding StaticAnalysisStatusMessage}" Classes="muted" TextWrapping="Wrap" />
                         <ProgressBar IsVisible="{Binding IsStaticAnalysisBusy}" IsIndeterminate="True" Height="4" />
+                        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center"
+                                    IsVisible="{Binding HasExportableReport}">
+                            <Button Content="Esporta report PDF" Classes="primary" Click="ExportReportPdf"
+                                    IsEnabled="{Binding CanExportReport}" />
+                            <TextBlock Text="{Binding ReportExportStatus}" IsVisible="{Binding HasReportExportStatus}"
+                                       Classes="muted" TextWrapping="Wrap" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <ProgressBar IsVisible="{Binding IsReportExportBusy}" IsIndeterminate="True" Height="4" />
                     </StackPanel>
                 </Border>
 

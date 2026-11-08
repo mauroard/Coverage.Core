@@ -15,6 +15,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly CoverageAnalysisService _analysisService;
     private readonly TestProjectDiscoveryService _testProjectDiscoveryService;
     private readonly StaticAnalysisService _staticAnalysisService;
+    private readonly PdfReportExportService _pdfReportExportService;
 
     public IReadOnlyList<CoverageProjectKindOption> ProjectTypes { get; }
 
@@ -87,13 +88,19 @@ public partial class MainViewModel : ViewModelBase
     private string staticAnalysisErrorMessage = string.Empty;
 
     [ObservableProperty]
+    private bool isReportExportBusy;
+
+    [ObservableProperty]
+    private string reportExportStatus = string.Empty;
+
+    [ObservableProperty]
     private bool isOverallCoverageThresholdEnabled = true;
 
     [ObservableProperty]
     private decimal minimumOverallCoverage = 80m;
 
     [ObservableProperty]
-    private bool isFileCoverageThresholdEnabled = true;
+    private bool isFileCoverageThresholdEnabled = false;
 
     [ObservableProperty]
     private decimal minimumFileCoverage = 80m;
@@ -130,6 +137,12 @@ public partial class MainViewModel : ViewModelBase
         ? string.Empty
         : $"Visualizzati {FilteredStaticAnalysisFindings.Count} di {StaticAnalysisResult.Findings.Count} rilievi";
 
+    public bool HasExportableReport => AnalysisResult is not null || StaticAnalysisResult is not null;
+
+    public bool CanExportReport => HasExportableReport && !IsBusy && !IsStaticAnalysisBusy && !IsReportExportBusy;
+
+    public bool HasReportExportStatus => !string.IsNullOrWhiteSpace(ReportExportStatus);
+
     public bool IsAnyQualityThresholdEnabled => IsOverallCoverageThresholdEnabled || IsFileCoverageThresholdEnabled;
 
     public bool HasQualityFindings => QualityReport?.HasFindings == true;
@@ -140,7 +153,7 @@ public partial class MainViewModel : ViewModelBase
 
     public bool HasQualityPassed => QualityReport?.HasPassed == true;
 
-    public bool CanSelectApplication => !IsBusy && !IsStaticAnalysisBusy && !IsDiscoveringTestProject;
+    public bool CanSelectApplication => !IsBusy && !IsStaticAnalysisBusy && !IsReportExportBusy && !IsDiscoveringTestProject;
 
     public string ApplicationPathDisplay => string.IsNullOrWhiteSpace(ApplicationPath)
         ? "Nessuna cartella selezionata"
@@ -184,10 +197,20 @@ public partial class MainViewModel : ViewModelBase
         CoverageAnalysisService analysisService,
         TestProjectDiscoveryService testProjectDiscoveryService,
         StaticAnalysisService staticAnalysisService)
+        : this(analysisService, testProjectDiscoveryService, staticAnalysisService, new PdfReportExportService())
+    {
+    }
+
+    public MainViewModel(
+        CoverageAnalysisService analysisService,
+        TestProjectDiscoveryService testProjectDiscoveryService,
+        StaticAnalysisService staticAnalysisService,
+        PdfReportExportService pdfReportExportService)
     {
         _analysisService = analysisService;
         _testProjectDiscoveryService = testProjectDiscoveryService;
         _staticAnalysisService = staticAnalysisService;
+        _pdfReportExportService = pdfReportExportService;
         ProjectTypes =
         [
             new CoverageProjectKindOption(CoverageProjectKind.Microservice, "Microservizio .NET"),
@@ -200,6 +223,7 @@ public partial class MainViewModel : ViewModelBase
     public async Task SelectApplicationPathAsync(string path)
     {
         ErrorMessage = string.Empty;
+        ReportExportStatus = string.Empty;
         AnalysisResult = null;
         ResetCoverageFiles();
         ResetStaticAnalysis();
@@ -235,6 +259,7 @@ public partial class MainViewModel : ViewModelBase
     private async Task AnalyzeAsync()
     {
         ErrorMessage = string.Empty;
+        ReportExportStatus = string.Empty;
         AnalysisResult = null;
         ResetCoverageFiles();
         LogEntries.Clear();
@@ -275,6 +300,7 @@ public partial class MainViewModel : ViewModelBase
     private async Task AnalyzeStaticAsync()
     {
         StaticAnalysisErrorMessage = string.Empty;
+        ReportExportStatus = string.Empty;
         StaticAnalysisResult = null;
         IsStaticAnalysisBusy = true;
         StaticAnalysisStatusMessage = "Preparazione dell'analisi statica...";
@@ -306,14 +332,77 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
+    public async Task ExportReportPdfAsync(Stream destination)
+    {
+        ArgumentNullException.ThrowIfNull(destination);
+        if (!destination.CanWrite)
+        {
+            ReportExportStatus = "Non è possibile scrivere nel file selezionato.";
+            return;
+        }
+
+        if (!HasExportableReport)
+        {
+            ReportExportStatus = "Non ci sono risultati da esportare.";
+            return;
+        }
+
+        IsReportExportBusy = true;
+        ReportExportStatus = "Generazione del report PDF...";
+        try
+        {
+            var request = new PdfReportExportRequest
+            {
+                ProjectName = ApplicationProjectName,
+                ApplicationPath = ApplicationPathDisplay,
+                ProjectType = SelectedProjectType?.Label ?? "Non specificato",
+                Coverage = AnalysisResult,
+                QualityReport = QualityReport,
+                StaticAnalysis = StaticAnalysisResult,
+                MinimumOverallCoverage = IsOverallCoverageThresholdEnabled ? MinimumOverallCoverage : null,
+                MinimumFileCoverage = IsFileCoverageThresholdEnabled ? MinimumFileCoverage : null,
+                FailOnThresholdViolation = FailOnThresholdViolation,
+            };
+            var pdf = await Task.Run(() => _pdfReportExportService.Generate(request));
+            await destination.WriteAsync(pdf);
+            ReportExportStatus = "Report PDF esportato correttamente.";
+        }
+        catch (PdfReportExportException exception)
+        {
+            ReportExportStatus = $"Esportazione PDF non riuscita: {exception.Message}";
+        }
+        catch (ArgumentException exception)
+        {
+            ReportExportStatus = $"I dati non possono essere rappresentati nel PDF: {exception.Message}";
+        }
+        catch (IOException exception)
+        {
+            ReportExportStatus = $"Impossibile scrivere il file PDF: {exception.Message}";
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            ReportExportStatus = $"Accesso negato durante il salvataggio del PDF: {exception.Message}";
+        }
+        catch (NotSupportedException exception)
+        {
+            ReportExportStatus = $"Il percorso selezionato non è supportato: {exception.Message}";
+        }
+        finally
+        {
+            IsReportExportBusy = false;
+        }
+    }
+
     private bool CanAnalyzeStatically() => !IsBusy
         && !IsStaticAnalysisBusy
+        && !IsReportExportBusy
         && !IsDiscoveringTestProject
         && !string.IsNullOrWhiteSpace(ApplicationPath)
         && SelectedProjectType is not null;
 
     private bool CanAnalyze() => !IsBusy
         && !IsStaticAnalysisBusy
+        && !IsReportExportBusy
         && !IsDiscoveringTestProject
         && !string.IsNullOrWhiteSpace(ApplicationPath)
         && !string.IsNullOrWhiteSpace(TestProjectPath)
@@ -447,6 +536,7 @@ public partial class MainViewModel : ViewModelBase
     partial void OnIsBusyChanged(bool value)
     {
         OnPropertyChanged(nameof(CanSelectApplication));
+        OnPropertyChanged(nameof(CanExportReport));
         AnalyzeCommand.NotifyCanExecuteChanged();
         AnalyzeStaticCommand.NotifyCanExecuteChanged();
     }
@@ -455,9 +545,20 @@ public partial class MainViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(CanSelectApplication));
         OnPropertyChanged(nameof(HasStaticAnalysisPanel));
+        OnPropertyChanged(nameof(CanExportReport));
         AnalyzeCommand.NotifyCanExecuteChanged();
         AnalyzeStaticCommand.NotifyCanExecuteChanged();
     }
+
+    partial void OnIsReportExportBusyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanSelectApplication));
+        OnPropertyChanged(nameof(CanExportReport));
+        AnalyzeCommand.NotifyCanExecuteChanged();
+        AnalyzeStaticCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnReportExportStatusChanged(string value) => OnPropertyChanged(nameof(HasReportExportStatus));
 
     partial void OnErrorMessageChanged(string value)
     {
@@ -472,6 +573,8 @@ public partial class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasResult));
         OnPropertyChanged(nameof(HasWarnings));
         OnPropertyChanged(nameof(HasNoCoverageFiles));
+        OnPropertyChanged(nameof(HasExportableReport));
+        OnPropertyChanged(nameof(CanExportReport));
         RefreshQualityReport();
     }
 
@@ -480,6 +583,8 @@ public partial class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasStaticAnalysisResult));
         OnPropertyChanged(nameof(HasStaticAnalysisPanel));
         OnPropertyChanged(nameof(HasStaticAnalysisWarnings));
+        OnPropertyChanged(nameof(HasExportableReport));
+        OnPropertyChanged(nameof(CanExportReport));
         ApplyStaticAnalysisFilters();
     }
 

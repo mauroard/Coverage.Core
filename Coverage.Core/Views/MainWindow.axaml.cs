@@ -66,4 +66,78 @@ public partial class MainWindow : Window
             viewModel.ClipboardStatus = $"Impossibile copiare il messaggio: {exception.Message}";
         }
     }
+
+    private async void ExportReportPdf(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainViewModel viewModel || !viewModel.CanExportReport)
+        {
+            return;
+        }
+
+        IStorageFile? file;
+        try
+        {
+            file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                Title = "Esporta report PDF",
+                SuggestedFileName = $"CoverageReport_{DateTime.Now:yyyyMMdd_HHmmss}.pdf",
+                DefaultExtension = "pdf",
+                FileTypeChoices =
+                [
+                    new FilePickerFileType("Documento PDF")
+                    {
+                        Patterns = ["*.pdf"],
+                        MimeTypes = ["application/pdf"],
+                    },
+                ],
+            });
+        }
+        catch (IOException exception)
+        {
+            viewModel.ReportExportStatus = $"Impossibile aprire la finestra di salvataggio: {exception.Message}";
+            return;
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            viewModel.ReportExportStatus = $"Accesso negato durante la selezione del file: {exception.Message}";
+            return;
+        }
+        catch (InvalidOperationException exception)
+        {
+            viewModel.ReportExportStatus = $"Impossibile aprire la finestra di salvataggio: {exception.Message}";
+            return;
+        }
+        catch (NotSupportedException exception)
+        {
+            viewModel.ReportExportStatus = $"Il salvataggio dei file non è supportato: {exception.Message}";
+            return;
+        }
+
+        if (file is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await using var stream = await file.OpenWriteAsync();
+            await viewModel.ExportReportPdfAsync(stream);
+        }
+        catch (IOException exception)
+        {
+            viewModel.ReportExportStatus = $"Impossibile salvare il PDF: {exception.Message}";
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            viewModel.ReportExportStatus = $"Accesso negato durante il salvataggio del PDF: {exception.Message}";
+        }
+        catch (InvalidOperationException exception)
+        {
+            viewModel.ReportExportStatus = $"Impossibile salvare il PDF: {exception.Message}";
+        }
+        catch (NotSupportedException exception)
+        {
+            viewModel.ReportExportStatus = $"Il percorso selezionato non è supportato: {exception.Message}";
+        }
+    }
 }

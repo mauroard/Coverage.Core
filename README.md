@@ -31,3 +31,7 @@ I file senza linee presenti nei report sono indicati come **Non misurato** e non
 ## Analisi statica
 
 Il pulsante **Analisi statica** avvia una verifica separata dal coverage. Per i progetti .NET raccoglie diagnostici di compilatore e analyzer tramite `dotnet build`; per Frontend MVC esegue gli script `lint` compatibili che invocano ESLint e producono JSON. Gli script con `--fix`, `--write` o più comandi concatenati vengono saltati per evitare modifiche automatiche ai sorgenti e output non interpretabile. I rilievi possono essere filtrati per gravità, regola e file. Se ESLint non è configurato, l'app mostra un avviso.
+
+## Esportazione PDF
+
+Il pulsante **Esporta report PDF** compare dopo un'analisi e salva localmente i risultati disponibili: riepilogo coverage, soglie e avvisi, file misurati e rilievi statici. Il PDF include tutti i rilievi statici, indipendentemente dai filtri visualizzati nell'interfaccia.
