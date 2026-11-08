@@ -26,6 +26,8 @@ internal static class ExternalProcessRunner
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
         };
 
         foreach (var argument in arguments)
@@ -52,8 +54,9 @@ internal static class ExternalProcessRunner
         var output = new StringBuilder();
         while (await reader.ReadLineAsync() is { } line)
         {
-            output.AppendLine(line);
-            progress?.Report($"{displayName}: {line}");
+            var normalizedLine = line.Normalize(NormalizationForm.FormC);
+            output.AppendLine(normalizedLine);
+            progress?.Report($"{displayName}: {normalizedLine}");
         }
 
         return output.ToString();

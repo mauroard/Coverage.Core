@@ -10,7 +10,8 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="Coverage.Core"
         Width="1040" Height="900" MinWidth="760" MinHeight="620"
-        Background="#F3F6FA">
+        Background="#F3F6FA"
+        FontFamily="Inter">
 
     <Window.Resources>
         <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUnchecked" Color="#172B4D" />
