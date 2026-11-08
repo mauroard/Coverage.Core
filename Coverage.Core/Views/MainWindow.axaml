@@ -245,9 +245,12 @@
 
                         <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                             <Button Content="Avvia analisi" Classes="primary" Command="{Binding AnalyzeCommand}" IsDefault="True" />
+                            <Button Content="Analisi statica" Classes="primary" Command="{Binding AnalyzeStaticCommand}" />
                             <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center" TextWrapping="Wrap" />
                         </StackPanel>
                         <ProgressBar IsVisible="{Binding IsBusy}" IsIndeterminate="True" Height="4" />
+                        <TextBlock Text="{Binding StaticAnalysisStatusMessage}" Classes="muted" TextWrapping="Wrap" />
+                        <ProgressBar IsVisible="{Binding IsStaticAnalysisBusy}" IsIndeterminate="True" Height="4" />
                     </StackPanel>
                 </Border>
 
@@ -377,6 +380,72 @@
                             <TextBlock Text="Nessun file sorgente trovato." Classes="muted" IsVisible="{Binding HasNoCoverageFiles}" />
                             <TextBlock Text="Nessun file corrisponde al filtro." Classes="muted" IsVisible="{Binding HasNoMatchingCoverageFiles}" />
                         </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card" IsVisible="{Binding HasStaticAnalysisPanel}">
+                    <StackPanel Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Analisi statica" Classes="section-title" />
+                                <TextBlock Text="{Binding StaticAnalysisStatusMessage}" Classes="muted" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" Text="{Binding StaticAnalysisFindingsCountText}" Classes="muted" VerticalAlignment="Center" />
+                        </Grid>
+
+                        <ItemsControl ItemsSource="{Binding StaticAnalysisResult.Warnings}" IsVisible="{Binding HasStaticAnalysisWarnings}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FFF8E6" BorderBrush="#F2D28B" BorderThickness="1" CornerRadius="7" Padding="10" Margin="0,0,0,6">
+                                        <TextBlock Text="{Binding}" Foreground="#704D00" TextWrapping="Wrap" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Border IsVisible="{Binding HasStaticAnalysisError}" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="7" Padding="10">
+                            <TextBlock Text="{Binding StaticAnalysisErrorMessage}" Foreground="#7F1D1D" TextWrapping="Wrap" />
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding HasStaticAnalysisResult}">
+                            <ComboBox ItemsSource="{Binding StaticAnalysisSeverityOptions}"
+                                      SelectedItem="{Binding SelectedStaticAnalysisSeverity, Mode=TwoWay}"
+                                      Width="160">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:StaticAnalysisSeverityOption">
+                                        <TextBlock Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBox PlaceholderText="Regola (es. CA...)"
+                                     Text="{Binding StaticAnalysisRuleFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="220" />
+                            <TextBox PlaceholderText="File (nome o percorso)"
+                                     Text="{Binding StaticAnalysisFileFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="280" />
+                        </StackPanel>
+
+                        <ListBox ItemsSource="{Binding FilteredStaticAnalysisFindings}"
+                                 Height="360" BorderThickness="0" Background="Transparent"
+                                 IsVisible="{Binding HasStaticAnalysisResult}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:StaticAnalysisFinding">
+                                    <Border BorderBrush="#E7ECF2" BorderThickness="0,0,0,1" Padding="8,10">
+                                        <StackPanel Spacing="4">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <TextBlock Text="{Binding SeverityLabel}" FontWeight="Bold" Foreground="#172B4D" />
+                                                <TextBlock Text="{Binding RuleId}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding LocationText}" Classes="muted" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding RelativePath}" Classes="muted" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock Text="Nessun rilievo statico trovato." Classes="muted" IsVisible="{Binding HasNoStaticAnalysisFindings}" />
+                        <TextBlock Text="Nessun rilievo corrisponde ai filtri." Classes="muted" IsVisible="{Binding HasNoMatchingStaticAnalysisFindings}" />
                     </StackPanel>
                 </Border>
             </StackPanel>

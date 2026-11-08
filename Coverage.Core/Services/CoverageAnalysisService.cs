@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml;
@@ -259,32 +257,8 @@ public sealed class CoverageAnalysisService
             || extension.Equals(".cshtml", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static IEnumerable<string> EnumerateFiles(string root, IReadOnlySet<string> excludedDirectories)
-    {
-        var pendingDirectories = new Stack<string>();
-        pendingDirectories.Push(root);
-
-        while (pendingDirectories.Count > 0)
-        {
-            var currentDirectory = pendingDirectories.Pop();
-            foreach (var file in Directory.EnumerateFiles(currentDirectory))
-            {
-                yield return file;
-            }
-
-            foreach (var directory in Directory.EnumerateDirectories(currentDirectory))
-            {
-                var directoryInfo = new DirectoryInfo(directory);
-                if (excludedDirectories.Contains(directoryInfo.Name)
-                    || (directoryInfo.Attributes & FileAttributes.ReparsePoint) != 0)
-                {
-                    continue;
-                }
-
-                pendingDirectories.Push(directory);
-            }
-        }
-    }
+    private static IEnumerable<string> EnumerateFiles(string root, IReadOnlySet<string> excludedDirectories) =>
+        ProjectFileEnumerator.Enumerate(root, excludedDirectories);
 
     private static List<string> FindFrontendCoveragePackages(string applicationRoot)
     {
@@ -337,35 +311,16 @@ public sealed class CoverageAnalysisService
             : ("npm", ["run", "test:coverage"], "npm run test:coverage");
     }
 
-    private static async Task<ProcessResult> RunProcessAsync(
+    private static async Task<ExternalProcessResult> RunProcessAsync(
         string fileName,
         IReadOnlyList<string> arguments,
         string workingDirectory,
         string displayName,
         IProgress<string>? progress)
     {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = fileName,
-            WorkingDirectory = workingDirectory,
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true,
-        };
-
-        foreach (var argument in arguments)
-        {
-            startInfo.ArgumentList.Add(argument);
-        }
-
-        using var process = new Process { StartInfo = startInfo };
         try
         {
-            if (!process.Start())
-            {
-                throw new CoverageAnalysisException($"Non è stato possibile avviare {displayName}.");
-            }
+            return await ExternalProcessRunner.RunAsync(fileName, arguments, workingDirectory, displayName, progress);
         }
         catch (Win32Exception exception)
         {
@@ -375,28 +330,9 @@ public sealed class CoverageAnalysisService
         {
             throw new CoverageAnalysisException($"Impossibile avviare {displayName}.", exception);
         }
-
-        var standardOutputTask = ReadOutputAsync(process.StandardOutput, displayName, progress);
-        var standardErrorTask = ReadOutputAsync(process.StandardError, displayName, progress);
-        await process.WaitForExitAsync();
-        var output = await Task.WhenAll(standardOutputTask, standardErrorTask);
-
-        return new ProcessResult(process.ExitCode, output[0], output[1]);
     }
 
-    private static async Task<string> ReadOutputAsync(StreamReader reader, string displayName, IProgress<string>? progress)
-    {
-        var output = new StringBuilder();
-        while (await reader.ReadLineAsync() is { } line)
-        {
-            output.AppendLine(line);
-            progress?.Report($"{displayName}: {line}");
-        }
-
-        return output.ToString();
-    }
-
-    private static void EnsureSuccessful(ProcessResult result, string displayName, bool includeCoverletHint)
+    private static void EnsureSuccessful(ExternalProcessResult result, string displayName, bool includeCoverletHint)
     {
         if (result.ExitCode == 0)
         {
@@ -412,7 +348,7 @@ public sealed class CoverageAnalysisService
             $"{displayName} è terminato con codice {result.ExitCode}.{hint}{Environment.NewLine}{output}");
     }
 
-    private static string GetLastProcessOutput(ProcessResult result, int lineCount)
+    private static string GetLastProcessOutput(ExternalProcessResult result, int lineCount)
     {
         var combinedOutput = result.StandardOutput + Environment.NewLine + result.StandardError;
         var outputLines = combinedOutput.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -422,6 +358,4 @@ public sealed class CoverageAnalysisService
     private static StringComparer PathComparer() => OperatingSystem.IsWindows()
         ? StringComparer.OrdinalIgnoreCase
         : StringComparer.Ordinal;
-
-    private sealed record ProcessResult(int ExitCode, string StandardOutput, string StandardError);
 }

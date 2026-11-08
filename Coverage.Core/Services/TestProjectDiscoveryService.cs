@@ -157,35 +157,12 @@ public sealed class TestProjectDiscoveryService
                 || Path.GetExtension(path).Equals(".slnx", StringComparison.OrdinalIgnoreCase));
     }
 
-    private static IEnumerable<string> EnumerateProjectFiles(string root)
-    {
-        var pendingDirectories = new Stack<string>();
-        pendingDirectories.Push(root);
+    private static IEnumerable<string> EnumerateProjectFiles(string root) =>
+        ProjectFileEnumerator.Enumerate(root, ExcludedDirectories)
+            .Where(path => Path.GetExtension(path).Equals(".csproj", StringComparison.OrdinalIgnoreCase))
+            .Select(Path.GetFullPath);
 
-        while (pendingDirectories.Count > 0)
-        {
-            var currentDirectory = pendingDirectories.Pop();
-            foreach (var file in Directory.EnumerateFiles(currentDirectory)
-                         .Where(path => Path.GetExtension(path).Equals(".csproj", StringComparison.OrdinalIgnoreCase)))
-            {
-                yield return Path.GetFullPath(file);
-            }
-
-            foreach (var directory in Directory.EnumerateDirectories(currentDirectory))
-            {
-                var directoryInfo = new DirectoryInfo(directory);
-                if (ExcludedDirectories.Contains(directoryInfo.Name)
-                    || (directoryInfo.Attributes & FileAttributes.ReparsePoint) != 0)
-                {
-                    continue;
-                }
-
-                pendingDirectories.Push(directory);
-            }
-        }
-    }
-
-    private static bool IsTestProject(string projectPath)
+    internal static bool IsTestProject(string projectPath)
     {
         var project = LoadProject(projectPath);
         if (project.Descendants().Any(element => element.Name.LocalName == "IsTestProject"

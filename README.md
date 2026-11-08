@@ -27,3 +27,7 @@ Le verifiche delle soglie per singolo file considerano solo i file per i quali s
 - Le view `.cshtml` sono misurate solo quando un report Cobertura o LCOV include esplicitamente quelle view. Il collector .NET non garantisce da solo la strumentazione delle Razor view.
 
 I file senza linee presenti nei report sono indicati come **Non misurato** e non vengono conteggiati come linee scoperte. Il riepilogo percentuale usa solo le linee effettivamente misurate.
+
+## Analisi statica
+
+Il pulsante **Analisi statica** avvia una verifica separata dal coverage. Per i progetti .NET raccoglie diagnostici di compilatore e analyzer tramite `dotnet build`; per Frontend MVC esegue gli script `lint` compatibili che invocano ESLint e producono JSON. Gli script con `--fix`, `--write` o più comandi concatenati vengono saltati per evitare modifiche automatiche ai sorgenti e output non interpretabile. I rilievi possono essere filtrati per gravità, regola e file. Se ESLint non è configurato, l'app mostra un avviso.
