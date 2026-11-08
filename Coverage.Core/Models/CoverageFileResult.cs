@@ -14,6 +14,10 @@ public sealed class CoverageFileResult
 
     public bool HasCoverageData => TotalLines > 0;
 
+    public bool IsUnmeasured => !HasCoverageData;
+
+    public bool IsZeroCoverage => HasCoverageData && CoveredLines == 0;
+
     public double CoveragePercentage => TotalLines == 0
         ? 0
         : (double)CoveredLines / TotalLines * 100;

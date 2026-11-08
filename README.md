@@ -9,7 +9,7 @@ Applicazione desktop Avalonia per eseguire i test di un progetto .NET e riepilog
 
 Seleziona la cartella del progetto applicativo dall'interfaccia. Quando trova un `.csproj`, l'app mostra nome e percorso completo del progetto applicativo e del progetto unit test rilevato automaticamente. La ricerca avviene nella soluzione o nel repository più vicino; se trova più progetti senza poterli associare, mostra un messaggio invece di sceglierne uno arbitrariamente.
 
-Al termine dell'analisi, usa il filtro nella sezione dei file sorgente per cercare per nome o percorso e verificare il coverage di un singolo file. Il filtro agisce solo sull'elenco: il riepilogo complessivo resta invariato.
+Al termine dell'analisi, usa il filtro nella sezione dei file sorgente per cercare per nome o percorso e verificare il coverage di un singolo file. Il filtro agisce solo sull'elenco: il riepilogo complessivo resta invariato. Nell'elenco, i file senza dati di coverage sono evidenziati in giallo; quelli con coverage misurato pari a 0% sono evidenziati in rosso.
 
 ## Soglie di qualità
 

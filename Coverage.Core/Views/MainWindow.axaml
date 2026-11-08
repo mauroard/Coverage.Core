@@ -142,6 +142,12 @@
         <Style Selector="CheckBox:indeterminate:pointerover /template/ Path#CheckGlyph">
             <Setter Property="Fill" Value="{DynamicResource CheckBoxCheckGlyphForegroundIndeterminate}" />
         </Style>
+        <Style Selector="Border.coverage-file.unmeasured">
+            <Setter Property="Background" Value="#FFFAE3" />
+        </Style>
+        <Style Selector="Border.coverage-file.zero-coverage">
+            <Setter Property="Background" Value="#FEF2F2" />
+        </Style>
     </Window.Styles>
 
     <Grid RowDefinitions="Auto,*">
@@ -326,10 +332,14 @@
                             <TextBlock Grid.Column="2" Text="Linee" Classes="muted" FontWeight="SemiBold" Width="105" TextAlignment="Right" />
                         </Grid>
                         <StackPanel Spacing="16">
-                            <ListBox ItemsSource="{Binding FilteredCoverageFiles}" Height="360" BorderThickness="0" Background="Transparent">
+                            <ListBox ItemsSource="{Binding FilteredCoverageFiles}"
+                                     Height="360" BorderThickness="0" Background="Transparent">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate x:DataType="models:CoverageFileResult">
-                                        <Border BorderBrush="#E7ECF2" BorderThickness="0,0,0,1" Padding="8,10">
+                                        <Border BorderBrush="#E7ECF2" BorderThickness="0,0,0,1" Padding="8,10"
+                                                Classes="coverage-file"
+                                                Classes.unmeasured="{Binding IsUnmeasured}"
+                                                Classes.zero-coverage="{Binding IsZeroCoverage}">
                                             <Grid ColumnDefinitions="*,Auto,Auto">
                                                 <StackPanel Spacing="3">
                                                     <TextBlock Text="{Binding RelativePath}" Foreground="#172B4D" TextWrapping="Wrap" />
@@ -342,6 +352,20 @@
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
+
+                            <TextBlock Text="Legenda:" Classes="muted" FontSize="12" HorizontalAlignment="Left" />
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
+                                <Border Background="#FFFAE3" CornerRadius="4" Padding="8,6">
+                                    <TextBlock Text=" " />
+                                </Border>
+                                <TextBlock Text="Nessun dato di coverage" Classes="muted" FontSize="12" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
+                                <Border Background="#FEF2F2" CornerRadius="4" Padding="8,6">
+                                    <TextBlock Text=" " />
+                                </Border>
+                                <TextBlock Text="Coverage misurata 0%" Classes="muted" FontSize="12" VerticalAlignment="Center" />
+                            </StackPanel>
 
                             <TextBlock Text="I file senza dati di coverage non sono conteggiati come linee scoperte." Classes="muted" TextWrapping="Wrap" />
                             <TextBlock Text="{Binding AnalysisResult.ReportDirectory}" Classes="muted" TextWrapping="Wrap" />
