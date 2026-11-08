@@ -1,0 +1,361 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Coverage.Core.ViewModels"
+        xmlns:models="using:Coverage.Core.Models"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1040" d:DesignHeight="900"
+        x:Class="Coverage.Core.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Coverage.Core"
+        Width="1040" Height="900" MinWidth="760" MinHeight="620"
+        Background="#F3F6FA">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUnchecked" Color="#172B4D" />
+    </Window.Resources>
+
+    <Window.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="20" />
+        </Style>
+        <Style Selector="TextBlock.section-title">
+            <Setter Property="FontSize" Value="19" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#172B4D" />
+        </Style>
+        <Style Selector="TextBlock.field-label">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#344563" />
+        </Style>
+        <Style Selector="TextBlock.muted">
+            <Setter Property="Foreground" Value="#667085" />
+        </Style>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#2563EB" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="Padding" Value="18,10" />
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#2563EB" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}" />
+        </Style>
+        <Style Selector="Button.primary:pressed">
+            <Setter Property="Background" Value="#F3F6FA" />
+            <Setter Property="Foreground" Value="#2D6A9F" />
+            <Setter Property="BorderBrush" Value="#2D6A9F" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="Button.folder-picker">
+            <Setter Property="Background" Value="#2D6A9F" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#24587F" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="14,9" />
+            <Setter Property="MinWidth" Value="230" />
+            <Setter Property="MinHeight" Value="42" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="Button.folder-picker:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#2D6A9F" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#24587F" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="Button.folder-picker:pressed">
+            <Setter Property="Background" Value="#F3F6FA" />
+            <Setter Property="Foreground" Value="#2D6A9F" />
+            <Setter Property="BorderBrush" Value="#2D6A9F" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="Button.folder-picker:disabled">
+            <Setter Property="Background" Value="#98A8B8" />
+            <Setter Property="Foreground" Value="#344563" />
+            <Setter Property="BorderBrush" Value="#7B8C9C" />
+        </Style>
+        <Style Selector="Button.filter-clear">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#667085" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="FontSize" Value="18" />
+        </Style>
+        <Style Selector="Button.filter-clear:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#667085" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="CheckBox /template/ Border#NormalRectangle">
+            <Setter Property="BorderBrush" Value="#172B4D" />
+        </Style>
+        <Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
+            <Setter Property="BorderBrush" Value="#172B4D" />
+        </Style>
+        <Style Selector="CheckBox:indeterminate /template/ Border#NormalRectangle">
+            <Setter Property="BorderBrush" Value="#172B4D" />
+        </Style>
+        <Style Selector="CheckBox:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="#172B4D" />
+        </Style>
+        <Style Selector="CheckBox:pointerover /template/ Border#PART_Border">
+            <Setter Property="Background" Value="{DynamicResource CheckBoxBackgroundUnchecked}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxBorderBrushUnchecked}" />
+        </Style>
+        <Style Selector="CheckBox:pointerover /template/ Border#NormalRectangle">
+            <Setter Property="BorderBrush" Value="#172B4D" />
+            <Setter Property="Background" Value="{DynamicResource CheckBoxCheckBackgroundFillUnchecked}" />
+        </Style>
+        <Style Selector="CheckBox:pointerover /template/ Path#CheckGlyph">
+            <Setter Property="Fill" Value="{DynamicResource CheckBoxCheckGlyphForegroundUnchecked}" />
+        </Style>
+        <Style Selector="CheckBox:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="#172B4D" />
+        </Style>
+        <Style Selector="CheckBox:checked:pointerover /template/ Border#PART_Border">
+            <Setter Property="Background" Value="{DynamicResource CheckBoxBackgroundChecked}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxBorderBrushChecked}" />
+        </Style>
+        <Style Selector="CheckBox:checked:pointerover /template/ Border#NormalRectangle">
+            <Setter Property="BorderBrush" Value="#172B4D" />
+            <Setter Property="Background" Value="{DynamicResource CheckBoxCheckBackgroundFillChecked}" />
+        </Style>
+        <Style Selector="CheckBox:checked:pointerover /template/ Path#CheckGlyph">
+            <Setter Property="Fill" Value="{DynamicResource CheckBoxCheckGlyphForegroundChecked}" />
+        </Style>
+        <Style Selector="CheckBox:indeterminate:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="#172B4D" />
+        </Style>
+        <Style Selector="CheckBox:indeterminate:pointerover /template/ Border#PART_Border">
+            <Setter Property="Background" Value="{DynamicResource CheckBoxBackgroundIndeterminate}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxBorderBrushIndeterminate}" />
+        </Style>
+        <Style Selector="CheckBox:indeterminate:pointerover /template/ Border#NormalRectangle">
+            <Setter Property="BorderBrush" Value="#172B4D" />
+            <Setter Property="Background" Value="{DynamicResource CheckBoxCheckBackgroundFillIndeterminate}" />
+        </Style>
+        <Style Selector="CheckBox:indeterminate:pointerover /template/ Path#CheckGlyph">
+            <Setter Property="Fill" Value="{DynamicResource CheckBoxCheckGlyphForegroundIndeterminate}" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" Background="#16324F" Padding="28,22">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Coverage Inspector" FontSize="27" FontWeight="Bold" Foreground="White" />
+                    <TextBlock Text="Analisi del line coverage per microservizi .NET e frontend MVC" Foreground="#D5E4F2" />
+                </StackPanel>
+                <Border Grid.Column="1" Background="#254766" CornerRadius="14" Padding="12,7" VerticalAlignment="Center">
+                    <TextBlock Text="ANALISI LOCALE" FontSize="11" FontWeight="Bold" Foreground="White" />
+                </Border>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24" Spacing="16">
+                <Border Classes="card">
+                    <StackPanel Spacing="14">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Configurazione" Classes="section-title" />
+                            <TextBlock Text="Seleziona la cartella applicativa; il progetto unit test verrà individuato automaticamente." Classes="muted" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Progetto applicativo" Classes="field-label" />
+                            <StackPanel Spacing="8">
+                                <Border BorderBrush="#D0D5DD" BorderThickness="1" CornerRadius="6" Background="#F8FAFC" Padding="10,8" MinHeight="40">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="{Binding ApplicationProjectName}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding ApplicationPathDisplay}" Classes="muted" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+                                <Button Content="Seleziona cartella applicazione"
+                                        Classes="folder-picker"
+                                        Click="BrowseApplicationPath"
+                                        HorizontalAlignment="Left"
+                                        IsEnabled="{Binding CanSelectApplication}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Progetto unit test (rilevato automaticamente)" Classes="field-label" />
+                            <Border BorderBrush="#D0D5DD" BorderThickness="1" CornerRadius="6" Background="#F8FAFC" Padding="10,8" MinHeight="40">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="{Binding TestProjectName}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding TestProjectPathDisplay}" IsVisible="{Binding HasTestProject}" Classes="muted" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding TestProjectDiscoveryMessage}" Classes="muted" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Tipo di applicazione" Classes="field-label" />
+                            <ComboBox ItemsSource="{Binding ProjectTypes}"
+                                      SelectedItem="{Binding SelectedProjectType}"
+                                      HorizontalAlignment="Left"
+                                      Width="280">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:CoverageProjectKindOption">
+                                        <TextBlock Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <Border Background="#F8FAFC" BorderBrush="#E7ECF2" BorderThickness="1" CornerRadius="8" Padding="12">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Soglie di qualità" Classes="field-label" />
+                                <Grid ColumnDefinitions="300,10,130,10,Auto" VerticalAlignment="Center">
+                                    <CheckBox Grid.Column="0" Content="Coverage complessiva minima" IsChecked="{Binding IsOverallCoverageThresholdEnabled}" Foreground="#172B4D" />
+                                    <NumericUpDown Grid.Column="2" Minimum="0" Maximum="100" Increment="1" FormatString="0.##" Width="130"
+                                                    Value="{Binding MinimumOverallCoverage, Mode=TwoWay}"
+                                                    IsEnabled="{Binding IsOverallCoverageThresholdEnabled}" />
+                                    <TextBlock Grid.Column="4" Text="%" VerticalAlignment="Center" Foreground="#172B4D" />
+                                </Grid>
+                                <Grid ColumnDefinitions="300,10,130,10,Auto" VerticalAlignment="Center">
+                                    <CheckBox Grid.Column="0" Content="Coverage minima per file" IsChecked="{Binding IsFileCoverageThresholdEnabled}" Foreground="#172B4D" />
+                                    <NumericUpDown Grid.Column="2" Minimum="0" Maximum="100" Increment="1" FormatString="0.##" Width="130"
+                                                    Value="{Binding MinimumFileCoverage, Mode=TwoWay}"
+                                                    IsEnabled="{Binding IsFileCoverageThresholdEnabled}" />
+                                    <TextBlock Grid.Column="4" Text="%" VerticalAlignment="Center" Foreground="#172B4D" />
+                                </Grid>
+                                <CheckBox Content="Segnala come esito negativo se una soglia non è rispettata"
+                                          IsChecked="{Binding FailOnThresholdViolation}"
+                                          IsEnabled="{Binding IsAnyQualityThresholdEnabled}"
+                                          Foreground="#172B4D" />
+                                <TextBlock Text="Le soglie sono attive all'avvio e hanno valore iniziale 80%. Anche il check di esito negativo è attivo all'avvio; disattivandolo, il mancato rispetto genera avvisi. I file senza dati di coverage non sono valutati singolarmente; se nessun file è misurabile, la soglia per file non è verificabile."
+                                           Classes="muted" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Microservizio: file .cs. Frontend MVC: .cs, .ts, .tsx e .cshtml. Per il frontend vengono letti i report LCOV e, se presente, eseguito lo script npm test:coverage."
+                                   Classes="muted" TextWrapping="Wrap" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                            <Button Content="Avvia analisi" Classes="primary" Command="{Binding AnalyzeCommand}" IsDefault="True" />
+                            <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ProgressBar IsVisible="{Binding IsBusy}" IsIndeterminate="True" Height="4" />
+                    </StackPanel>
+                </Border>
+
+                <Border IsVisible="{Binding HasError}" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="10" Padding="16">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Analisi non riuscita" FontWeight="Bold" Foreground="#991B1B" />
+                        <TextBlock Text="{Binding ErrorMessage}" Foreground="#7F1D1D" TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                            <Button Content="Copia messaggio" Classes="folder-picker" Click="CopyErrorMessage" />
+                            <TextBlock Text="{Binding ClipboardStatus}" IsVisible="{Binding HasClipboardStatus}" Classes="muted" VerticalAlignment="Center" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card" IsVisible="{Binding HasResult}">
+                    <StackPanel Spacing="14">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Risultato" Classes="section-title" />
+                                <TextBlock Text="{Binding AnalysisResult.SummaryText}" Classes="muted" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding AnalysisResult.CoverageLabel}"
+                                       FontSize="28" FontWeight="Bold" Foreground="#176B4D"
+                                       VerticalAlignment="Center" Margin="16,0,0,0" />
+                        </Grid>
+
+                        <ItemsControl ItemsSource="{Binding AnalysisResult.Warnings}" IsVisible="{Binding HasWarnings}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FFF8E6" BorderBrush="#F2D28B" BorderThickness="1" CornerRadius="7" Padding="10" Margin="0,0,0,6">
+                                        <TextBlock Text="{Binding}" Foreground="#704D00" TextWrapping="Wrap" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Border IsVisible="{Binding IsQualityGateFailed}" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="7" Padding="10">
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="Esito negativo: quality gate non superato." FontWeight="Bold" Foreground="#991B1B" />
+                                <TextBlock Text="{Binding QualityReport.FindingsText}" Foreground="#7F1D1D" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        <Border IsVisible="{Binding HasQualityWarning}" Background="#FFF8E6" BorderBrush="#F2D28B" BorderThickness="1" CornerRadius="7" Padding="10">
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="Avviso: una o più soglie di qualità non sono rispettate." FontWeight="Bold" Foreground="#704D00" />
+                                <TextBlock Text="{Binding QualityReport.FindingsText}" Foreground="#704D00" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        <Border IsVisible="{Binding HasQualityPassed}" Background="#ECFDF3" BorderBrush="#A6F4C5" BorderThickness="1" CornerRadius="7" Padding="10">
+                            <TextBlock Text="Soglie di qualità rispettate." FontWeight="Bold" Foreground="#176B4D" />
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock Text="File sorgente" Classes="field-label" VerticalAlignment="Center" />
+                            <Border CornerRadius="6"
+                                    BorderBrush="#D0D5DD"
+                                    BorderThickness="1"
+                                    Background="#FFFFFF"
+                                    Width="320">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBox Watermark="Filtra per nome o percorso..."
+                                             Text="{Binding CoverageFileFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0"
+                                             Background="Transparent"
+                                             Padding="10,8"
+                                             VerticalAlignment="Center" />
+                                    <Button Content="×"
+                                            Command="{Binding ClearCoverageFileFilterCommand}"
+                                            IsVisible="{Binding HasCoverageFileFilter}"
+                                            Classes="filter-clear"
+                                            ToolTip.Tip="Cancella filtro"
+                                            Grid.Column="1" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="{Binding CoverageFileCountText}" Classes="muted" FontSize="12" />
+
+                        <Grid ColumnDefinitions="*,Auto,Auto" Margin="8,0,12,0">
+                            <TextBlock Text="File" Classes="muted" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="1" Text="Coverage" Classes="muted" FontWeight="SemiBold" Margin="12,0" />
+                            <TextBlock Grid.Column="2" Text="Linee" Classes="muted" FontWeight="SemiBold" Width="105" TextAlignment="Right" />
+                        </Grid>
+                        <StackPanel Spacing="16">
+                            <ListBox ItemsSource="{Binding FilteredCoverageFiles}" Height="360" BorderThickness="0" Background="Transparent">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:CoverageFileResult">
+                                        <Border BorderBrush="#E7ECF2" BorderThickness="0,0,0,1" Padding="8,10">
+                                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                                <StackPanel Spacing="3">
+                                                    <TextBlock Text="{Binding RelativePath}" Foreground="#172B4D" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding Language}" Classes="muted" FontSize="12" />
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1" Text="{Binding CoverageText}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="12,0" Foreground="#176B4D" />
+                                                <TextBlock Grid.Column="2" Text="{Binding LinesText}" Classes="muted" Width="105" TextAlignment="Right" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <TextBlock Text="I file senza dati di coverage non sono conteggiati come linee scoperte." Classes="muted" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding AnalysisResult.ReportDirectory}" Classes="muted" TextWrapping="Wrap" />
+
+                            <Expander Header="Dettagli esecuzione">
+                                <ListBox ItemsSource="{Binding LogEntries}" Height="180" />
+                            </Expander>
+
+                            <TextBlock Text="Nessun file sorgente trovato." Classes="muted" IsVisible="{Binding HasNoCoverageFiles}" />
+                            <TextBlock Text="Nessun file corrisponde al filtro." Classes="muted" IsVisible="{Binding HasNoMatchingCoverageFiles}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>
