@@ -18,6 +18,8 @@ public sealed class CoverageFileResult
 
     public bool IsZeroCoverage => HasCoverageData && CoveredLines == 0;
 
+    public bool IsFullyCovered => HasCoverageData && CoveredLines == TotalLines;
+
     public double CoveragePercentage => TotalLines == 0
         ? 0
         : (double)CoveredLines / TotalLines * 100;

@@ -149,6 +149,9 @@
         <Style Selector="Border.coverage-file.zero-coverage">
             <Setter Property="Background" Value="#FEF2F2" />
         </Style>
+        <Style Selector="Border.coverage-file.fully-covered">
+            <Setter Property="Background" Value="#ECFDF3" />
+        </Style>
     </Window.Styles>
 
     <Grid RowDefinitions="Auto,*">
@@ -351,7 +354,8 @@
                                         <Border BorderBrush="#E7ECF2" BorderThickness="0,0,0,1" Padding="8,10"
                                                 Classes="coverage-file"
                                                 Classes.unmeasured="{Binding IsUnmeasured}"
-                                                Classes.zero-coverage="{Binding IsZeroCoverage}">
+                                                Classes.zero-coverage="{Binding IsZeroCoverage}"
+                                                Classes.fully-covered="{Binding IsFullyCovered}">
                                             <Grid ColumnDefinitions="*,Auto,Auto">
                                                 <StackPanel Spacing="3">
                                                     <TextBlock Text="{Binding RelativePath}" Foreground="#172B4D" TextWrapping="Wrap" />
@@ -377,6 +381,12 @@
                                     <TextBlock Text=" " />
                                 </Border>
                                 <TextBlock Text="Coverage misurata 0%" Classes="muted" FontSize="12" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
+                                <Border Background="#ECFDF3" CornerRadius="4" Padding="8,6">
+                                    <TextBlock Text=" " />
+                                </Border>
+                                <TextBlock Text="Coverage misurata 100%" Classes="muted" FontSize="12" VerticalAlignment="Center" />
                             </StackPanel>
 
                             <TextBlock Text="I file senza dati di coverage non sono conteggiati come linee scoperte." Classes="muted" TextWrapping="Wrap" />
